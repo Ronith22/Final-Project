@@ -1,0 +1,2 @@
+def fhfh(message: str)-> bool:
+    

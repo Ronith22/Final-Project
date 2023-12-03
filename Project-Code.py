@@ -1,8 +1,8 @@
 from designer import *
 from dataclasses import dataclass
 from random import randint
-RUNNER_SPEED = 5
-OBSTACLE_DROP_SPEED = 5
+RUNNER_SPEED = 10
+
 
 
 @dataclass
@@ -12,11 +12,13 @@ class World:
     obstacles: list[DesignerObject]
     score: int
     counter: DesignerObject
+    collision: bool
 
+background_image("https://images.freeimages.com/clg/istock/previews/8322/83224399-skyscraper-icon.jpg")
 
 def create_world() -> World:
     """ Create the world """
-    return World(create_runner(), RUNNER_SPEED, [], 0, text("black", "Score:", 30, 200, 50), )
+    return World(create_runner(), RUNNER_SPEED, [], 0, text("black", "Score:", 30, 200, 50), False)
 
 
 def create_runner() -> DesignerObject:
@@ -71,7 +73,7 @@ def move_runner(world: World):
 def make_obstacles_fall(world: World):
     """ Move all the water drops down """
     for obstacle in world.obstacles:
-        obstacle.y += OBSTACLE_DROP_SPEED
+        obstacle.y += randint(2, 13)
 
 
 def destroy_obstacles_on_landing(world: World):
@@ -79,11 +81,14 @@ def destroy_obstacles_on_landing(world: World):
     kept = []
     new_score = 0
     for obstacle in world.obstacles:
-        if obstacle.y > 0:
+        if obstacle.y < 570:
             kept.append(obstacle)
         else:
             destroy(obstacle)
-    world.obstacles = kept
+            new_score += 1
+        world.obstacles = kept
+        world.score += new_score
+        print("Updated Score:", world.score)
 
 
 
@@ -98,7 +103,7 @@ def make_obstacles(world: World):
 def collide_runner_obstacle(world: World):
     for obstacle in world.obstacles:
         if colliding(obstacle, world.runner):
-            flash_game_over()
+            world.collision = True
 
 def update_score(world: World):
     world.counter.text = "Score: " + str(world.score)
@@ -106,17 +111,18 @@ def update_score(world: World):
 
 def flash_game_over(world: World):
     """Show the game over message"""
-    world.counter.text = "GAME OVER!"
+    if world.collision:
+        world.counter.text = "GAME OVER!, Score: " + str(world.score)
+        pause()
 
-
-when("updating", update_score)
+when('starting', create_world)
+when("updating", move_runner)
+when("updating", make_obstacles)
 when('updating', collide_runner_obstacle)
 when("updating", destroy_obstacles_on_landing)
 when("updating", make_obstacles_fall)
-when("updating", make_obstacles)
 when("updating", boundary_check_runner)
 when("typing", flip_runner)
-when('starting', create_world)
-when("updating", move_runner)
-
+when("updating", update_score)
+when("updating", flash_game_over)
 start()

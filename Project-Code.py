@@ -17,19 +17,19 @@ class World:
 background_image("https://images.freeimages.com/clg/istock/previews/8322/83224399-skyscraper-icon.jpg")
 
 def create_world() -> World:
-    """ Create the world """
+    """ Create the game world """
     return World(create_runner(), RUNNER_SPEED, [], 0, text("black", "Score:", 30, 200, 50), False)
 
 
 def create_runner() -> DesignerObject:
-    """ Create the runner """
+    """ Create the runner/ Carlo the Gorilla """
     runner = emoji("Gorilla")
     runner.y = 550
     runner.flip_x = True
     return runner
 
 def create_obstacle() -> DesignerObject:
-    """ Create the Obstacle"""
+    """ Create the Barrel"""
     obstacle = rectangle("red", 60, 20)
     obstacle.x = randint(0, get_width())
     obstacle.y = 10
@@ -37,19 +37,19 @@ def create_obstacle() -> DesignerObject:
 
 
 def head_left(world: World):
-    """ Make the copter start moving left """
+    """ Make Carlo start moving left """
     world.runner_speed = -(RUNNER_SPEED)
     world.runner.flip_x = False
 
 
 def head_right(world: World):
-    """ Make the copter start moving left """
+    """ Make Carlo start moving right """
     world.runner_speed = RUNNER_SPEED
     world.runner.flip_x = True
 
 
 def boundary_check_runner(world: World):
-    """ Handle the copter bouncing off a wall """
+    """ Handles if the player tries to run Carlo off screen """
     if world.runner.x > get_width():
         head_left(world)
     elif world.runner.x < 0:
@@ -57,7 +57,7 @@ def boundary_check_runner(world: World):
 
 
 def flip_runner(world: World, key: str):
-    """ Change the direction that the copter is moving """
+    """ Changes the direction Carlo is moving"""
     if key == "left":
         head_left(world)
     elif key == "right":
@@ -65,19 +65,20 @@ def flip_runner(world: World, key: str):
 
 
 def move_runner(world: World):
-    """ Move the copter horizontally"""
+    """ Moves Carlo horizontally"""
     world.runner.x += world.runner_speed
 
 
 
 def make_obstacles_fall(world: World):
-    """ Move all the water drops down """
+    """ Makes the barrels fall down at varying speeds ranging from 2-13 """
     for obstacle in world.obstacles:
         obstacle.y += randint(2, 13)
 
 
 def destroy_obstacles_on_landing(world: World):
-    """ Destroy any water drops that have landed on the ground """
+    """ Destroys any obstacles that have fallen past the screen, also updates score by +1 for
+    each obstacle to do so."""
     kept = []
     new_score = 0
     for obstacle in world.obstacles:
@@ -93,7 +94,7 @@ def destroy_obstacles_on_landing(world: World):
 
 
 def make_obstacles(world: World):
-    """ Create a new fire at random times, if there aren't enough fires """
+    """ Checks to see how many obstacle objects exist on the screen and then generates more."""
     not_too_many_obstacles = len(world.obstacles) < 10
     random_chance = randint(20, 100) == 50
     if not_too_many_obstacles and random_chance:
@@ -101,11 +102,14 @@ def make_obstacles(world: World):
 
 
 def collide_runner_obstacle(world: World):
+    """Checks every update to see if the runner and the obstacle have collided, returns a message in
+    form of a boolean."""
     for obstacle in world.obstacles:
         if colliding(obstacle, world.runner):
             world.collision = True
 
 def update_score(world: World):
+    """Updates the score"""
     world.counter.text = "Score: " + str(world.score)
 
 
